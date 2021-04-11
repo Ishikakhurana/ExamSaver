@@ -1,12 +1,12 @@
 const puppeteer=require("puppeteer");
 //topics whose playlist one wants to get
 //one can change according to their requirement
-let topics=["dbms","data structures","operating system"];
+let topics=["database management system","data structures","operating system"];
 //one has to sign in to google account due to restrictions once before running this script.
 //fails in case of 2-factor authentication requirement 
 let [id,password]=require('./critical.js');
 //
-try{
+
 (async function(){
     //new chromium window
 let browser=await puppeteer.launch({headless:false,
@@ -38,14 +38,21 @@ let browser=await puppeteer.launch({headless:false,
     }
     
 
-    
+    //  // noteshub
+    //  for(let i=0;i<topics.length;i++){
+    //     await notesAndPapers(tab,browser,topics[i]);
+    //      }
 
 
 //close tab
 await tab.close();
 
 
-})();
+})().then(function(){
+    console.log("done!");
+}).catch(function(error){
+console.log(error);
+});
 // searchPlaylist=>function to search playlists and save most liked out of top 5 entries
 async function searchPlaylist(browser,topic){
     //new page for each topic search
@@ -83,6 +90,7 @@ async function searchPlaylist(browser,topic){
     await newtab.type('input.style-scope.tp-yt-paper-input',topic);
     await newtab.click('#button.style-scope.ytd-button-renderer.style-blue-text.size-default');
     await newtab.waitForTimeout(500);
+   
     //close this tab
     await newtab.close();
 
@@ -112,12 +120,28 @@ let likesNumber=parseInt(likesString.split(" likes")[0].trim().split(',').join("
 
 
 }
+// async function notesAndPapers(tab,browser,topic){
+    
+//     await tab.goto("https://noteshub.co.in/");
+//     await tab.waitForSelector('.landing-main input[aria-autocomplete="list"]');
+//     await tab.click('.landing-main input[aria-autocomplete="list"]');
+//     await tab.type('.landing-main input[aria-autocomplete="list"]',topic);
+//     await tab.waitForTimeout(300);
+//     await tab.waitForSelector('[role="option"]');
+//     await tab.waitForTimeout(300);
+//     await tab.click('[role="option"]');
+//     await tab.waitForSelector('.row .col-lg-4.col-md-4.col-sm-6.col-xs-12.ng-star-inserted');
+// let entries=await tab.$$('.row .col-lg-4.col-md-4.col-sm-6.col-xs-12.ng-star-inserted');
+//     let viewsInfo=[{"maxViews":0,"link":""}];
+//     for(let i=0;i<entries.length;i++){
+// await getMax(entries[i],viewsInfo,tab);
+// }
+// console.log(entries);
+// }
+// async function getMax(entry,viewsInfo,tab)
+// {
+//    let views=await tab.$('[ptooltip="Views"]')
+// console.log(views);
 
-}
-catch(e){
-    console.log('error found');
-    console.log(e);
-}
-finally{
-console.log("done done")
-}
+// }
+
