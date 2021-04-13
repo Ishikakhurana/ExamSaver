@@ -1,7 +1,8 @@
 const puppeteer=require("puppeteer");
 //topics whose playlist one wants to get
 //one can change according to their requirement
-let topics=["database management system","data structures","operating system"];
+let topics=["Java Foundation pepcoding","Operating System"];
+let notes=["Java","Operating System"];
 //one has to sign in to google account due to restrictions once before running this script.
 //fails in case of 2-factor authentication requirement 
 let [id,password]=require('./critical.js');
@@ -38,14 +39,16 @@ let browser=await puppeteer.launch({headless:false,
     }
     
 
-    //  // noteshub
-    //  for(let i=0;i<topics.length;i++){
-    //     await notesAndPapers(tab,browser,topics[i]);
-    //      }
+    
+console.log("playlist added")
 
 
-//close tab
-await tab.close();
+let newTab= await browser.newPage(); // noteshub
+for(let i=0;i<notes.length;i++){
+   await notesAndPapers(newTab,browser,notes[i]);
+    }
+    
+console.log("notes available")
 
 
 })().then(function(){
@@ -67,7 +70,7 @@ async function searchPlaylist(browser,topic){
     //gets all videos on opage for topic search
     let allVideosatag=await newtab.$$('div#contents .style-scope.ytd-item-section-renderer[prominent-thumb-style="DEFAULT"] a#thumbnail');
     //info array to store max likes and links for those 
-    let info=[{"max":0,"maxlink":""}];
+    let info={"max":0,"maxlink":""};
     
     for(let i=0;i<5;i++){
         //for first 5 i.e. top 5 recommendations find link and call getMostLiked function
@@ -78,7 +81,7 @@ async function searchPlaylist(browser,topic){
         await getMostLiked(link,browser,info);
     }
     // redirect this tab to most liked playlist
-    await newtab.goto(info[0]['maxlink']);
+    await newtab.goto(info['maxlink']);
     //save to playlist
     await newtab.waitForSelector('[aria-label="Save to playlist"]')
     await newtab.click('[aria-label="Save to playlist"]');
@@ -110,9 +113,9 @@ async function getMostLiked(link,browser,info){
 //string likes to Number ->for comparison
 let likesNumber=parseInt(likesString.split(" likes")[0].trim().split(',').join(""));
 //compare likes to previous max ->if more then previous->update max and maxlink  
-   if(info[0]['max']<likesNumber){
-       info[0]['max']=likesNumber;
-       info[0]['maxlink']=link;
+   if(info['max']<likesNumber){
+       info['max']=likesNumber;
+       info['maxlink']=link;
 
    }
 //close this tab
@@ -120,28 +123,46 @@ let likesNumber=parseInt(likesString.split(" likes")[0].trim().split(',').join("
 
 
 }
-// async function notesAndPapers(tab,browser,topic){
+async function notesAndPapers(tab,browser,topic){
     
-//     await tab.goto("https://noteshub.co.in/");
-//     await tab.waitForSelector('.landing-main input[aria-autocomplete="list"]');
-//     await tab.click('.landing-main input[aria-autocomplete="list"]');
-//     await tab.type('.landing-main input[aria-autocomplete="list"]',topic);
-//     await tab.waitForTimeout(300);
-//     await tab.waitForSelector('[role="option"]');
-//     await tab.waitForTimeout(300);
-//     await tab.click('[role="option"]');
-//     await tab.waitForSelector('.row .col-lg-4.col-md-4.col-sm-6.col-xs-12.ng-star-inserted');
-// let entries=await tab.$$('.row .col-lg-4.col-md-4.col-sm-6.col-xs-12.ng-star-inserted');
-//     let viewsInfo=[{"maxViews":0,"link":""}];
-//     for(let i=0;i<entries.length;i++){
-// await getMax(entries[i],viewsInfo,tab);
-// }
-// console.log(entries);
-// }
-// async function getMax(entry,viewsInfo,tab)
-// {
-//    let views=await tab.$('[ptooltip="Views"]')
-// console.log(views);
+    await tab.goto("https://noteshub.co.in/");
+    await tab.waitForSelector('.landing-main input[aria-autocomplete="list"]');
+    await tab.click('.landing-main input[aria-autocomplete="list"]');
+    await tab.type('.landing-main input[aria-autocomplete="list"]',topic);
+    await tab.waitForTimeout(300);
+    await tab.waitForSelector('[role="option"]');
+    await tab.waitForTimeout(300);
+    await tab.click('[role="option"]');
+    await tab.waitForSelector('div[aria-haspopup="listbox"]');
+    await tab.click('div[aria-haspopup="listbox"]');
+    await tab.waitForSelector('li[aria-label="Question Papers"]');
+    await tab.click('li[aria-label="Question Papers"]');
+    await tab.waitForSelector('div.views');
+    // let cards=await tab.$$('div.card-stats');
+    let infoViews={'maxViews':0,'maxIndex':0}
+    let views= await tab.$$('div.views');
+    for(let i=0;i<views.length;i++){
+let strViews=await tab.evaluate(function(elem){
+    return elem.innerText; 
+},views[i]);
+let numViews=parseInt(strViews.split(" Views")[0].trim());
+if(numViews>infoViews['maxViews']){
+    infoViews['maxViews']=numViews;
+    infoViews['maxIndex']=i;
+}
+}
+let idx=infoViews['maxIndex'];
+// let detailsBtn=await tab.$$('[label="Details"]');
+let cards=await tab.$$('.col-lg-4.col-md-4.col-sm-6.col-xs-12.ng-star-inserted');
 
-// }
+await cards[idx].click();
+await tab.waitForTimeout(3000);
+// await tab.waitForSelector('[title="Download"]');
+// await tab.waitForSelector('[label="View"]');
+// await tab.click('[label="View"]');
+// await tab.waitForSelector('')
 
+
+    }
+   
+    
